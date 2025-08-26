@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  dns-checker:
+    build: .
+    container_name: dns-checker
+    network_mode: host
+    privileged: true
+    volumes:
+      - ./files:/app/files:ro
+      - ./src:/app/src
+    environment:
+      - PYTHONUNBUFFERED=1
+    stdin_open: true
+    tty: true
+    command: python src/main.py
+
+  dns-replayer:
+    build: .
+    container_name: dns-replayer
+    network_mode: host
+    privileged: true
+    volumes:
+      - ./files:/app/files:ro
+      - ./src:/app/src
+    environment:
+      - PYTHONUNBUFFERED=1
+    stdin_open: true
+    tty: true
+    # Example: replay test1.pcapng to 8.8.8.8 at 2x speed with looping
+    command: python src/dns_replayer.py test1.pcapng --server 8.8.8.8 --speed 2.0 --loop
