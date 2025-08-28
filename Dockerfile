@@ -10,15 +10,22 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-COPY requirements.txt .
+# Copy package configuration first for better Docker layer caching
+COPY pyproject.toml .
 
-RUN pip install --upgrade pip && pip install -r requirements.txt
+# Install the package in development mode
+RUN pip install --upgrade pip && pip install -e .
 
 # Copy source code and files
-COPY src/ ./src/
+COPY dnsreplay/ ./dnsreplay/
 COPY files/ ./files/
 
-# Set up capabilities for packet capture (requires privileged mode)
-# This allows the container to capture network packets
+# Create output directory for results
+RUN mkdir -p /app/output
 
-CMD ["python", "src/main.py"]
+# Set up environment for the dnsreplay package
+ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
+
+# Default command runs the CLI tool
+CMD ["python", "-m", "dnsreplay", "--help"]

@@ -1,31 +1,56 @@
-version: '3.8'
-
 services:
-  dns-checker:
+  dnsreplay:
     build: .
-    container_name: dns-checker
-    network_mode: host
-    privileged: true
+    container_name: dnsreplay-tool
     volumes:
       - ./files:/app/files:ro
-      - ./src:/app/src
+      - ./dnsreplay:/app/dnsreplay
+      - ./output:/app/output
     environment:
       - PYTHONUNBUFFERED=1
     stdin_open: true
     tty: true
-    command: python src/main.py
+    # Example: analyze a PCAP file with shorter timeout for demo
+    command: ["python", "-m", "dnsreplay", "files/Sample3.pcap", "--out-csv", "output/results.csv", "--out-jsonl", "output/results.jsonl", "--timeout", "60", "--log-level", "INFO"]
 
-  dns-replayer:
+  dnsreplay-interactive:
     build: .
-    container_name: dns-replayer
-    network_mode: host
-    privileged: true
+    container_name: dnsreplay-interactive
     volumes:
       - ./files:/app/files:ro
-      - ./src:/app/src
+      - ./dnsreplay:/app/dnsreplay
+      - ./output:/app/output
     environment:
       - PYTHONUNBUFFERED=1
     stdin_open: true
     tty: true
-    # Example: replay test1.pcapng to 8.8.8.8 at 2x speed with looping
-    command: python src/dns_replayer.py test1.pcapng --server 8.8.8.8 --speed 2.0 --loop
+    # Interactive shell for custom commands
+    command: ["/bin/bash"]
+
+  dnsreplay-quick:
+    build: .
+    container_name: dnsreplay-quick
+    volumes:
+      - ./files:/app/files:ro
+      - ./dnsreplay:/app/dnsreplay
+      - ./output:/app/output
+    environment:
+      - PYTHONUNBUFFERED=1
+    stdin_open: true
+    tty: true
+    # Quick demo with 30 second timeout
+    command: ["python", "-m", "dnsreplay", "files/Sample3.pcap", "--out-csv", "output/quick-results.csv", "--timeout", "30", "--rps", "50", "--concurrency", "10", "--log-level", "INFO"]
+
+  dnsreplay-debug:
+    build: .
+    container_name: dnsreplay-debug
+    volumes:
+      - ./files:/app/files:ro
+      - ./dnsreplay:/app/dnsreplay
+      - ./output:/app/output
+    environment:
+      - PYTHONUNBUFFERED=1
+    stdin_open: true
+    tty: true
+    # Debug mode with detailed logging
+    command: ["python", "-m", "dnsreplay", "files/Sample3.pcap", "--out-csv", "output/debug-results.csv", "--samples-jsonl", "output/debug-samples.jsonl", "--timeout", "180", "--rps", "25", "--concurrency", "10", "--log-level", "DEBUG"]

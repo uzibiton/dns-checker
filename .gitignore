@@ -1,3 +1,5 @@
 __pycache__
 .vscode/*
 venv312/*
+results.csv
+results.jsonl
